@@ -75,18 +75,13 @@ class HomeFragment private constructor(): Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        homeViewModel.getAccountList().observe(viewLifecycleOwner) { accounts ->
-            accounts?.let {
-                this@HomeFragment.lifecycleScope.launch {
-                    ColorSetter.clear()
-                    accounts.forEach {
-                        it.sum = homeViewModel.setAccountAmount(it.id)
-                        it.color = ColorSetter.getNextColor()
-                    }
-
-                    updateUI(accounts)
-                }
+        lifecycleScope.launch {
+            val treeMap = homeViewModel.getTreeMap()
+            val accountList = mutableListOf<Account>()
+            treeMap.forEach { (k, v) ->
+                accountList.add(v)
             }
+            updateUI(accountList)
         }
     }
 
@@ -107,7 +102,6 @@ class HomeFragment private constructor(): Fragment() {
         courseTextView.text = getString(R.string.course, rate)
 
         withContext(Dispatchers.IO) {
-            homeViewModel.getTreeMap()
             homeViewModel.setAmount(rate)
         }
 

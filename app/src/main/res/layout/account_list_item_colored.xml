@@ -36,6 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
+                android:textColor="@color/black"
                 tools:text="First acc" />
             <TextView
                 android:id="@+id/account_ammount"
