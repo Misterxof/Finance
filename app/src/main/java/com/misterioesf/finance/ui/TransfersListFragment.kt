@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 private const val ACCOUNT_ID = "ACCOUNT_ID"
 
-class TransfersListFragment private constructor() : Fragment() {
+class TransfersListFragment: Fragment() {
 
     private lateinit var viewModel: TransfersListViewModel
     private lateinit var recyclerView: RecyclerView
@@ -55,13 +55,11 @@ class TransfersListFragment private constructor() : Fragment() {
         accountSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 updateCurrentList()
-                Log.e("TRANSFERS", "select")
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
 
             }
-
         }
 
         setHasOptionsMenu(true)
@@ -69,8 +67,8 @@ class TransfersListFragment private constructor() : Fragment() {
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onResume() {
+        super.onResume()
         updateSpinnerAdapter()
     }
 

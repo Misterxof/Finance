@@ -25,7 +25,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [AccountListFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class AccountListFragment private constructor() : Fragment() {
+class AccountListFragment constructor() : Fragment() {
     lateinit var adapter: AccountListAdapter
     lateinit var accountListViewModel: AccountListViewModel
     lateinit var accountListRecyclerView: RecyclerView

@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class HomeFragment private constructor(): Fragment() {
+class HomeFragment: Fragment() {
 
     private lateinit var diagramView: CircleDiagramView
     private lateinit var homeViewModel: HomeViewModel

@@ -26,7 +26,7 @@ private const val ACCOUNT = "ACCOUNT"
  * Use the [AccountHomeFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class AccountHomeFragment private constructor(val back: () -> Unit) : Fragment() {
+class AccountHomeFragment constructor(val back: () -> Unit) : Fragment() {
     // TODO: Rename and change types of parameters
     private var account: Account? = null
     lateinit var accountHomeViewModel: AccountHomeViewModel

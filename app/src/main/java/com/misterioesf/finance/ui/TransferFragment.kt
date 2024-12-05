@@ -30,7 +30,7 @@ private const val ARG_PARAM1 = "TRANSFER"
  * Use the [TransferFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class TransferFragment private constructor(val accountId: Int, val currency: Currencies, val back: () -> Unit) : Fragment() {
+class TransferFragment constructor(val accountId: Int, val currency: Currencies, val back: () -> Unit) : Fragment() {
     private lateinit var date: Date
     private var transfer: Transfer? = null
     private lateinit var viewModel: TransferViewModel
