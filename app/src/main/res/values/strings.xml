@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Finance</string>
+    <string name="menu_home_title">Home</string>
+    <string name="menu_all_transfers_title">Transfers</string>
+    <string name="menu_all_bills_title">Bills</string>
+    <string name="menu_app_bar_add">Add</string>
+    <string name="add_new_transfer_amount">Amount</string>
+    <string name="add_new_transfer_description">Description</string>
+    <string name="add_new_transfer_is_bill">Bill</string>
+    <string name="add_new_transfer_date">Date</string>
+    <string name="add_new_transfer_confirm">Confirm</string>
+    <string name="delete_transfer_title">Delete transfer</string>
+    <string name="delete_account_title">Delete account</string>
+    <string name="delete_transfer_description">Do you want to delete ths transfer?</string>
+    <string name="delete_account_description">Do you want to delete ths account?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="course">Usd: %1$f BYN</string>
+
+    <string-array name="add_new_transfer_currency_list">
+        <item>BYN</item>
+        <item>USD</item>
+        <item>EU</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
