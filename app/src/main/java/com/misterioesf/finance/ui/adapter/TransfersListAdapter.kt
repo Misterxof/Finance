@@ -55,7 +55,6 @@ class TransfersListAdapter(
         }
 
         override fun onClick(p0: View?) {
-            Log.e("TRANSFER ADA", "ITEM")
             onTransferClick(transfer)
         }
     }

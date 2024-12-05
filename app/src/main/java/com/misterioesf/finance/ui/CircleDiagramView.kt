@@ -22,16 +22,16 @@ class CircleDiagramView constructor(
     context: Context,
     attributeSet: AttributeSet? = null
 ) : View(context, attributeSet) {
+    private lateinit var oval: RectF
+    private lateinit var oval2: RectF
+
+    private val radius by lazy { sqrt(((viewSize - ((viewSize + startX) / 2)) * (viewSize - ((viewSize + startX) / 2))).toDouble()) }
+    private val paint = Paint()
+    private val linePaint = Paint()
 
     private var viewWidth by Delegates.notNull<Int>()
     private var viewHeight by Delegates.notNull<Int>()
     private var viewSize by Delegates.notNull<Float>()
-//    private val radius by lazy { (viewSize + startX) / 2}
-    private val radius by lazy { sqrt(((viewSize - ((viewSize + startX) / 2))*(viewSize - ((viewSize + startX) / 2))).toDouble()) }
-    private lateinit var oval: RectF
-    private lateinit var oval2: RectF
-    private val paint = Paint()
-    private val linePaint = Paint()
     private var startX = 200F
     private var startY = 200F
     private var diagramElements: TreeMap<String, Account> = TreeMap()
@@ -41,20 +41,15 @@ class CircleDiagramView constructor(
     private var totalAmount = 0.00
 
     init {
-        attributeSet?.let {
-            val attrs = context.obtainStyledAttributes(attributeSet, R.styleable.CircleDiagram)
-
-            attrs?.let {
-                Log.e(TAG, "Attrs ${it.getDimension(R.styleable.CircleDiagram_sem, 100f)}")
-            }
-        }
-
         linePaint.color = Color.BLACK
         linePaint.strokeWidth = 5F
 
-        themeColor = Utils.getColorFromTheme(getContext(), com.google.android.material.R.attr.colorOnPrimary)
-        themeColorSecond = Utils.getColorFromTheme(getContext(), com.google.android.material.R.attr.colorPrimary)
-        textColor = Utils.getColorFromTheme(getContext(), com.google.android.material.R.attr.editTextColor)
+        themeColor =
+            Utils.getColorFromTheme(getContext(), com.google.android.material.R.attr.colorOnPrimary)
+        themeColorSecond =
+            Utils.getColorFromTheme(getContext(), com.google.android.material.R.attr.colorPrimary)
+        textColor =
+            Utils.getColorFromTheme(getContext(), com.google.android.material.R.attr.editTextColor)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -83,7 +78,6 @@ class CircleDiagramView constructor(
     private fun drawColorDiagram(
         canvas: Canvas?
     ) {
-        // test subj
         var sum = diagramElements.values.sumOf { it.sum }
         var startAngle = 0F
         var size = diagramElements.size
@@ -91,7 +85,6 @@ class CircleDiagramView constructor(
         diagramElements.forEach {
             var degree = (360F * it.value.sum) / sum
             val endAngle = startAngle + degree
-            val middleAngle = (startAngle + endAngle) / 2
 
             if (size == 1) degree += 360 - endAngle
 
@@ -104,27 +97,28 @@ class CircleDiagramView constructor(
         }
 
         paint.color = themeColor
-        canvas?.drawCircle(oval.centerX(), oval.centerY(), radius.toFloat() - dpToPixel(10f), paint)
+        canvas?.drawCircle(
+            oval.centerX(),
+            oval.centerY(),
+            radius.toFloat() - Utils.dpToPixel(context, 10f),
+            paint
+        )
         paint.color = textColor
         paint.textSize = 80f
         val totalAmountText = "$totalAmount$"
-        canvas?.drawText("Total:", oval.centerX() - dpToPixel(35f), oval.centerY() - dpToPixel(20f), paint)
+        canvas?.drawText(
+            "Total:",
+            oval.centerX() - Utils.dpToPixel(context, 35f),
+            oval.centerY() - Utils.dpToPixel(context, 20f),
+            paint
+        )
         paint.color = themeColorSecond
-        canvas?.drawText(totalAmountText, oval.centerX() - dpToPixel(setTextX(totalAmountText)), oval.centerY() + dpToPixel(10f), paint)
-       // canvas?.let { drawSquare(it) }
-    }
-
-    fun setTextX(string: String): Float {
-        return when(string.length) {
-            1 -> 15f
-            else -> (string.length - 2) * 10f
-        }
-    }
-
-    fun dpToPixel(dp: Float): Float {
-        val resources = context.resources
-        val metrics = resources.displayMetrics
-        return (dp * metrics.density) + 0.5f
+        canvas?.drawText(
+            totalAmountText,
+            oval.centerX() - Utils.dpToPixel(context, Utils.setTextX(totalAmountText)),
+            oval.centerY() + Utils.dpToPixel(context, 10f),
+            paint
+        )
     }
 
     fun setMap(diagramElements: TreeMap<String, Account>) {
@@ -137,5 +131,7 @@ class CircleDiagramView constructor(
         invalidate()
     }
 
-    fun redraw() { invalidate() }
+    fun redraw() {
+        invalidate()
+    }
 }

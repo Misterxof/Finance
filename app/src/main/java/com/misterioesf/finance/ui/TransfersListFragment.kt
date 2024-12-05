@@ -1,7 +1,6 @@
 package com.misterioesf.finance.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -10,6 +9,7 @@ import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.Currencies
@@ -20,15 +20,12 @@ import com.misterioesf.finance.ui.adapter.TransfersListAdapter
 import com.misterioesf.finance.viewModel.TransfersListViewModel
 import kotlinx.coroutines.launch
 
-private const val ACCOUNT_ID = "ACCOUNT_ID"
-
-class TransfersListFragment: Fragment() {
-
+class TransfersListFragment : Fragment() {
     private lateinit var viewModel: TransfersListViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TransfersListAdapter
     private lateinit var accountSpinner: Spinner
-    private var addNewObjectCallback: AddNewObjectCallback? = null
+
     private var accountsList: List<Account>? = null
 
     override fun onCreateView(
@@ -37,15 +34,9 @@ class TransfersListFragment: Fragment() {
     ): View? {
         viewModel = ViewModelProvider(this)[TransfersListViewModel::class.java]
 
-        addNewObjectCallback = context as AddNewObjectCallback
-
         val view = inflater.inflate(R.layout.fragment_transfers__list, container, false)
         adapter = TransfersListAdapter(emptyList()) {
-            addNewObjectCallback?.onTransferSelected(
-                viewModel.getAccountId(),
-                viewModel.getCurrency(),
-                it
-            )
+            navigateToTransferFragment(it)
         }
         recyclerView = view.findViewById(R.id.transfers_recycle_view) as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -57,9 +48,7 @@ class TransfersListFragment: Fragment() {
                 updateCurrentList()
             }
 
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-
-            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
         setHasOptionsMenu(true)
@@ -81,16 +70,11 @@ class TransfersListFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.add_new_transfer_item -> {
-                addNewObjectCallback?.onTransferSelected(viewModel.getAccountId(), viewModel.getCurrency(),null)
+                navigateToTransferFragment(null)
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        addNewObjectCallback = null
     }
 
     private fun updateSpinnerAdapter() {
@@ -142,11 +126,7 @@ class TransfersListFragment: Fragment() {
 
     private fun updateUI(transfers: List<Transfer>) {
         adapter = TransfersListAdapter(transfers) {
-            addNewObjectCallback?.onTransferSelected(
-                it.accountId,
-                viewModel.getCurrency(),
-                it
-            )
+            navigateToTransferFragment(it)
         }
         recyclerView.adapter = adapter
     }
@@ -156,7 +136,12 @@ class TransfersListFragment: Fragment() {
         viewModel.setAccountId(accId)
     }
 
-    companion object {
-        fun newInstance() = TransfersListFragment()
+    private fun navigateToTransferFragment(transfer: Transfer?) {
+        val action = TransfersListFragmentDirections.actionAllTransfersFragmentToTransferFragment(
+            transfer,
+            viewModel.getAccountId(),
+            viewModel.getCurrency(),
+        )
+        requireView().findNavController().navigate(action)
     }
 }

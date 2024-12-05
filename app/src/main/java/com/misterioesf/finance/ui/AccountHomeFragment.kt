@@ -2,46 +2,29 @@ package com.misterioesf.finance.ui
 
 import android.app.AlertDialog
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.navArgs
 import com.misterioesf.finance.Currencies
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.viewModel.AccountHomeViewModel
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ACCOUNT = "ACCOUNT"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [AccountHomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class AccountHomeFragment constructor(val back: () -> Unit) : Fragment() {
-    // TODO: Rename and change types of parameters
+class AccountHomeFragment : Fragment() {
+    private val args: AccountHomeFragmentArgs by navArgs()
     private var account: Account? = null
+
     lateinit var accountHomeViewModel: AccountHomeViewModel
     lateinit var accountName: EditText
     lateinit var accountAmount: TextView
     lateinit var accountSpinner: Spinner
     lateinit var addAccountConfirmButton: Button
     lateinit var deleteAccountImageButton: ImageButton
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            account = it.getSerializable(ACCOUNT) as Account?
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,10 +38,16 @@ class AccountHomeFragment constructor(val back: () -> Unit) : Fragment() {
         addAccountConfirmButton = view.findViewById(R.id.add_new_account_button)
         deleteAccountImageButton = view.findViewById(R.id.delete_account_img_button)
 
+        account = args.account
+
         if (account == null) {
             deleteAccountImageButton.isEnabled = false
             deleteAccountImageButton.visibility = View.GONE
         } else {
+            accountSpinner.isEnabled = false
+            accountSpinner.visibility = View.GONE
+            addAccountConfirmButton.isEnabled = false
+            addAccountConfirmButton.visibility = View.GONE
             account?.let {
                 accountName.setText(it.name)
                 accountAmount.text = it.sum.toString()
@@ -78,7 +67,7 @@ class AccountHomeFragment constructor(val back: () -> Unit) : Fragment() {
                 .setMessage(R.string.delete_account_description)
                 .setPositiveButton(R.string.yes) { _, _ ->
                     account?.let { accountHomeViewModel.deleteAccount(it) }
-                    back()
+                    requireView().findNavController().navigateUp()
                 }
                 .setNegativeButton(R.string.no, null).show()
         }
@@ -94,24 +83,6 @@ class AccountHomeFragment constructor(val back: () -> Unit) : Fragment() {
         )
 
         accountHomeViewModel.addNewAccount(newAccount)
-        back()
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param account Parameter 1.
-         * @return A new instance of fragment AccountHomeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(account: Account?, back: () -> Unit) =
-            AccountHomeFragment(back).apply {
-                arguments = Bundle().apply {
-                    putSerializable(ACCOUNT, account)
-                }
-            }
+        requireView().findNavController().navigateUp()
     }
 }

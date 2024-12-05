@@ -21,5 +21,18 @@ class Utils {
             context.theme.resolveAttribute(resId, typedValue, true)
             return ContextCompat.getColor(context, typedValue.resourceId)
         }
+
+        fun setTextX(string: String): Float {
+            return when (string.length) {
+                1 -> 15f
+                else -> (string.length - 2) * 10f
+            }
+        }
+
+        fun dpToPixel(context: Context, dp: Float): Float {
+            val resources = context.resources
+            val metrics = resources.displayMetrics
+            return (dp * metrics.density) + 0.5f
+        }
     }
 }

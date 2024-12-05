@@ -14,5 +14,5 @@ data class Account(
     var sum: Double,
     var currency: String,
     ) : java.io.Serializable {
-        @Transient var color : Int = 0xFF000000.toInt()
+        @Ignore var color : Int = 0xFF000000.toInt()
     }

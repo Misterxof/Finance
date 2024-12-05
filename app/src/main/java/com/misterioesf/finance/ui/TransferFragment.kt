@@ -1,18 +1,15 @@
 package com.misterioesf.finance.ui
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.Spinner
+import android.widget.*
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.misterioesf.finance.Currencies
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Transfer
@@ -30,12 +27,16 @@ private const val ARG_PARAM1 = "TRANSFER"
  * Use the [TransferFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class TransferFragment constructor(val accountId: Int, val currency: Currencies, val back: () -> Unit) : Fragment() {
-    private lateinit var date: Date
-    private var transfer: Transfer? = null
+class TransferFragment : Fragment() {
     private lateinit var viewModel: TransferViewModel
+    private lateinit var currency: Currencies
+    private lateinit var date: Date
+    private lateinit var datePickerFragment: DatePickerDialogFragment
 
-    lateinit var datePickerFragment: DatePickerDialogFragment
+    private val args: TransferFragmentArgs by navArgs()
+    private var transfer: Transfer? = null
+    private var accountId: Int = -1
+
     lateinit var amountEditText: EditText
     lateinit var descriptionEditText: EditText
     lateinit var pickDateButton: Button
@@ -43,13 +44,6 @@ class TransferFragment constructor(val accountId: Int, val currency: Currencies,
     lateinit var currencySpinner: Spinner
     lateinit var isBillCheckBox: CheckBox
     lateinit var deleteTransferImageButton: ImageButton
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            transfer = it.getSerializable(ARG_PARAM1) as Transfer?
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,10 +59,17 @@ class TransferFragment constructor(val accountId: Int, val currency: Currencies,
         isBillCheckBox = view.findViewById(R.id.isBill_check_box)
         deleteTransferImageButton = view.findViewById(R.id.delete_transfer_img_button)
 
+        // Get the arguments
+        transfer = args.transfer
+        accountId = args.accountId
+        currency = args.currency
+
         currencySpinner.setSelection(Currencies.getCurrencyByName(currency.name))
         currencySpinner.isEnabled = false
 
         if (transfer != null) {
+            confirmButton.visibility = View.GONE
+            confirmButton.isEnabled = false
             transfer?.let {
                 amountEditText.setText(it.sum.toString())
                 descriptionEditText.setText(it.description)
@@ -116,7 +117,7 @@ class TransferFragment constructor(val accountId: Int, val currency: Currencies,
                 .setMessage(R.string.delete_transfer_description)
                 .setPositiveButton(R.string.yes) { _, _ ->
                     transfer?.let { viewModel.deleteTransfer(it) }
-                    back()
+                    this.findNavController().navigateUp()
                 }
                 .setNegativeButton(R.string.no, null).show()
         }
@@ -124,7 +125,7 @@ class TransferFragment constructor(val accountId: Int, val currency: Currencies,
         return view
     }
 
-    fun addNewTransfer() {
+    private fun addNewTransfer() {
         val transfer = Transfer(
             sum = amountEditText.text.toString().toDouble(),
             description = descriptionEditText.text.toString(),
@@ -135,24 +136,6 @@ class TransferFragment constructor(val accountId: Int, val currency: Currencies,
         )
 
         viewModel.addNewTransfer(transfer)
-        back()
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param transfer Parameter 1.
-         * @return A new instance of fragment TransferFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(accountId: Int, currency: Currencies, transfer: Transfer?, back: () -> Unit) =
-            TransferFragment(accountId, currency, back).apply {
-                arguments = Bundle().apply {
-                    putSerializable(ARG_PARAM1, transfer)
-                }
-            }
+        this.findNavController().navigateUp()
     }
 }

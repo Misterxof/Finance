@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.misterioesf.finance.ui.HomeFragment"
+        android:label="@string/menu_home_title"
+        tools:layout="@layout/fragment_home"/>
+
+    <fragment
+        android:id="@+id/allTransfersFragment"
+        android:name="com.misterioesf.finance.ui.TransfersListFragment"
+        android:label="@string/menu_all_transfers_title"
+        tools:layout="@layout/fragment_transfers__list">
+        <action
+            android:id="@+id/action_allTransfersFragment_to_transferFragment"
+            app:destination="@id/transferFragment"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"/>
+    </fragment>
+    <fragment
+        android:id="@+id/allAccountsFragment"
+        android:name="com.misterioesf.finance.ui.AccountListFragment"
+        android:label="@string/account"
+        tools:layout="@layout/fragment_account_list">
+        <action
+            android:id="@+id/action_allAccountsFragment_to_accountHomeFragment"
+            app:destination="@id/accountHomeFragment"
+            app:enterAnim="@animator/slide_in_right"
+            app:exitAnim="@animator/slide_out_left"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/transferFragment"
+        android:name="com.misterioesf.finance.ui.TransferFragment"
+        android:label="TransferFragment"
+        tools:layout="@layout/fragment_transfer">
+        <argument android:name="transfer"
+            app:argType="com.misterioesf.finance.dao.entity.Transfer"
+            android:defaultValue="@null"
+            app:nullable="true"/>
+        <argument
+            android:name="accountId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="currency"
+            app:argType="com.misterioesf.finance.Currencies"
+            android:defaultValue="USD" />
+    </fragment>
+    <fragment
+        android:id="@+id/accountHomeFragment"
+        android:name="com.misterioesf.finance.ui.AccountHomeFragment"
+        android:label="fragment_account_home"
+        tools:layout="@layout/fragment_account_home" >
+        <argument
+            android:name="account"
+            app:argType="com.misterioesf.finance.dao.entity.Account"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+</navigation>

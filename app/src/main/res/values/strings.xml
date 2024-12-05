@@ -7,6 +7,8 @@
     <string name="add_new_transfer_amount">Amount</string>
     <string name="add_new_transfer_description">Description</string>
     <string name="add_new_transfer_is_bill">Bill</string>
+    <string name="account">Account</string>
+    <string name="transfer">Transfer</string>
     <string name="add_new_transfer_date">Date</string>
     <string name="add_new_transfer_confirm">Confirm</string>
     <string name="delete_transfer_title">Delete transfer</string>

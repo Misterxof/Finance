@@ -3,30 +3,27 @@ package com.misterioesf.finance.ui
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.misterioesf.finance.ColorSetter
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.ui.adapter.AccountListAdapter
 import com.misterioesf.finance.viewModel.HomeViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class HomeFragment: Fragment() {
-
+class HomeFragment : Fragment() {
     private lateinit var diagramView: CircleDiagramView
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var courseTextView: TextView
@@ -34,13 +31,12 @@ class HomeFragment: Fragment() {
     private lateinit var adapter: AccountListAdapter
     private lateinit var sharedPreferences: SharedPreferences
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPreferences = requireContext().getSharedPreferences("SETTINGS", Context.MODE_PRIVATE)
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeViewModel.currencyCourse.collect() {
                     if (it != null) {
                         sharedPreferences?.edit()?.putFloat("USD", it.rate)?.apply()
@@ -63,7 +59,10 @@ class HomeFragment: Fragment() {
         diagramView = view.findViewById(R.id.circleDiagram)
         courseTextView = view.findViewById(R.id.course_text_view)
         adapter =
-            AccountListAdapter(emptyList(), R.layout.account_list_item_colored) {  }
+            AccountListAdapter(
+                emptyList(),
+                R.layout.account_list_item_colored
+            ) { navigateToAccountFragment(it) }
         homeAccountListRecyclerView = view.findViewById(R.id.home_account_list_rv)
         homeAccountListRecyclerView.adapter = adapter
         homeAccountListRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -92,13 +91,16 @@ class HomeFragment: Fragment() {
         }
     }
 
-    fun updateUI(accountList: List<Account>) {
+    private fun updateUI(accountList: List<Account>) {
         adapter =
-            AccountListAdapter(accountList, R.layout.account_list_item_colored) {  }
+            AccountListAdapter(
+                accountList,
+                R.layout.account_list_item_colored
+            ) { navigateToAccountFragment(it) }
         homeAccountListRecyclerView.adapter = adapter
     }
 
-    suspend fun setTotalAmount(rate: Float) {
+    private suspend fun setTotalAmount(rate: Float) {
         courseTextView.text = getString(R.string.course, rate)
 
         withContext(Dispatchers.IO) {
@@ -108,7 +110,10 @@ class HomeFragment: Fragment() {
         diagramView.setTotalAmount(homeViewModel.getTotalAmount())
     }
 
-    companion object {
-        fun newInstance() = HomeFragment()
+    private fun navigateToAccountFragment(account: Account?) {
+        val action = AccountListFragmentDirections.actionAllAccountsFragmentToAccountHomeFragment(
+            account
+        )
+        requireView().findNavController().navigate(action)
     }
 }

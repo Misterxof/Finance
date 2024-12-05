@@ -1,14 +1,12 @@
 package com.misterioesf.finance.viewModel
 
 import android.util.Log
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.misterioesf.finance.ColorSetter
 import com.misterioesf.finance.Currencies
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.dao.entity.Course
 import com.misterioesf.finance.repository.CurrencyRepository
-import com.misterioesf.finance.repository.FinanceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,12 +15,15 @@ import kotlinx.coroutines.withContext
 import java.util.*
 
 class HomeViewModel : BaseViewModel() {
-    private val accountTreeMap: TreeMap<String, Account> = TreeMap<String, Account>()
-    private val allAccountList = mutableListOf<Account>()
+    private val accountTreeMap = TreeMap<String, Account>()  // * msf + stateFlow
     private val currencyRepository = CurrencyRepository.getCurrencyRepository()
     private val _currencyCourse = MutableStateFlow<Course?>(null)
+
     private var totalAmount = 0.0
+    private var rate = 0f
     private var totalAmountCurrency = Currencies.USD
+    private var isAccountsAreSet = false
+    private var isCurrencyAreSet = false
 
     val currencyCourse = _currencyCourse.asStateFlow()
 
@@ -55,20 +56,34 @@ class HomeViewModel : BaseViewModel() {
                     accountTreeMap[account.name] = account
                     account.sum = amount
                     account.color = ColorSetter.getNextColor()
-                    allAccountList.add(account)
                 }
             }
+            setAmount(true)
 
             accountTreeMap
         }
     }
 
-    suspend fun setAmount(rate: Float) {
+    // it too long to wait currency api call, init with sp value and then just update it
+    fun setAmount(rate: Float) {
+        isCurrencyAreSet = true
+        this.rate = rate
+        if (isAccountsAreSet && isCurrencyAreSet)
+            setTotalAmount()
+    }
+
+    private fun setAmount(isAccount: Boolean) {
+        isAccountsAreSet = isAccount
+        if (isAccountsAreSet && isCurrencyAreSet)
+            setTotalAmount()
+    }
+
+    private fun setTotalAmount() {
         totalAmount = 0.0
-        allAccountList.forEach {account ->
-            when(Currencies.valueOf(account.currency)) {
-                Currencies.USD -> totalAmount += account.sum
-                Currencies.BYN -> totalAmount += account.sum / rate
+        accountTreeMap.forEach { account ->
+            when (Currencies.valueOf(account.value.currency)) {
+                Currencies.USD -> totalAmount += account.value.sum
+                Currencies.BYN -> totalAmount += account.value.sum / rate
                 else -> {}
             }
         }
@@ -78,5 +93,9 @@ class HomeViewModel : BaseViewModel() {
         return accountTreeMap
     }
 
-    fun getTotalAmount() = totalAmount
+    fun getTotalAmount(): Double {
+        isAccountsAreSet = false
+        isCurrencyAreSet = false
+        return totalAmount
+    }
 }

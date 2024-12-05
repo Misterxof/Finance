@@ -50,7 +50,6 @@ class AccountListAdapter(var accountList: List<Account>,val itemViewId: Int, val
         }
 
         override fun onClick(p0: View?) {
-            Log.e("ACCCCCC", "CLICK")
             onClick(account)
         }
     }
