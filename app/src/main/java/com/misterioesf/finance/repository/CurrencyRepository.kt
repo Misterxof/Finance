@@ -9,15 +9,25 @@ import javax.inject.Inject
 
 class CurrencyRepository @Inject constructor(private val service: CurrencyService?) {
 
-    suspend fun getCurrencyCourse(): Flow<Course> = flow {
+    suspend fun getUSDCourse(): Flow<Course> = flow {
             try {
                 service?.let {
                     val response = it.getUSDCourse()
                     response?.let{ emit(it) }
-                    Log.e("WWWWWWWWWWWWWW", response.toString())
                 }
             } catch (e: Exception) {
                 Log.e("WWWWWWWWWWWWWW", e.stackTraceToString())
             }
+    }
+
+    suspend fun getEURCourse(): Flow<Course> = flow {
+        try {
+            service?.let {
+                val response = it.getEURCourse()
+                response?.let{ emit(it) }
+            }
+        } catch (e: Exception) {
+            Log.e("WWWWWWWWWWWWWW", e.stackTraceToString())
+        }
     }
 }

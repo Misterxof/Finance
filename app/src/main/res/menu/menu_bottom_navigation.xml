@@ -7,6 +7,6 @@
         android:title="@string/menu_all_transfers_title"
         android:icon="@drawable/icon_navigation_all_transfers"/>
     <item android:id="@+id/allAccountsFragment"
-        android:title="@string/menu_all_bills_title"
+        android:title="@string/accounts"
         android:icon="@drawable/icon_navigation_all_transfers"/>
 </menu>

@@ -17,13 +17,21 @@
         app:layout_constraintHorizontal_weight="1">
 
         <TextView
-            android:id="@+id/course_text_view"
+            android:id="@+id/usd_course_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:text="@string/course" />
+
+        <TextView
+            android:id="@+id/eur_course_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/course_eur" />
 
 
     </LinearLayout>

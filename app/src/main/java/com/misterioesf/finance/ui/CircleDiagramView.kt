@@ -8,8 +8,9 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
-import com.misterioesf.finance.R
+import android.view.View.OnTouchListener
 import com.misterioesf.finance.Utils
 import com.misterioesf.finance.dao.entity.Account
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,6 +44,9 @@ class CircleDiagramView constructor(
     private var themeColorSecond: Int = 0
     private var textColor: Int = 0
     private var totalAmount = 0.00
+    private var totalEurAmount = 0.00
+    private var totalBynAmount = 0.00
+    private var currentCurrencyIndex = 0
 
     init {
         linePaint.color = Color.BLACK
@@ -85,6 +89,8 @@ class CircleDiagramView constructor(
         var sum = diagramElements.values.sumOf { it.sum }
         var startAngle = 0F
         var size = diagramElements.size
+        paint.style = Paint.Style.FILL
+        paint.strokeWidth = Utils.dpToPixel(context, 1f)
 
         diagramElements.forEach {
             var degree = (360F * it.value.sum) / sum
@@ -109,13 +115,53 @@ class CircleDiagramView constructor(
         )
         paint.color = textColor
         paint.textSize = 80f
-        val totalAmountText = "$totalAmount$"
+
         canvas?.drawText(
             "Total:",
             oval.centerX() - Utils.dpToPixel(context, 35f),
             oval.centerY() - Utils.dpToPixel(context, 20f),
             paint
         )
+
+        drawTotalAmountView(paint, canvas)
+    }
+
+    fun drawTotalAmountView(paint: Paint, canvas: Canvas?) {
+        var totalAmountText = "$totalAmount$"
+
+        when (currentCurrencyIndex) {
+            0 -> {
+                totalAmountText = "$totalAmount$"
+                drawIteratorCircle(
+                    paint,
+                    canvas,
+                    oval.centerX() - Utils.dpToPixel(context, 30f),
+                    oval.centerY() + Utils.dpToPixel(context, 60f),
+                    true
+                )
+            }
+            1 -> {
+                totalAmountText = "${totalEurAmount}€"
+                drawIteratorCircle(
+                    paint,
+                    canvas,
+                    oval.centerX(),
+                    oval.centerY() + Utils.dpToPixel(context, 60f),
+                    true
+                )
+            }
+            2 -> {
+                totalAmountText = "${totalBynAmount}Br"
+                drawIteratorCircle(
+                    paint,
+                    canvas,
+                    oval.centerX() + Utils.dpToPixel(context, 30f),
+                    oval.centerY() + Utils.dpToPixel(context, 60f),
+                    true
+                )
+            }
+        }
+
         paint.color = themeColorSecond
         canvas?.drawText(
             totalAmountText,
@@ -123,6 +169,36 @@ class CircleDiagramView constructor(
             oval.centerY() + Utils.dpToPixel(context, 10f),
             paint
         )
+
+        paint.color = Color.GRAY
+        paint.style = Paint.Style.STROKE
+        canvas?.drawCircle(
+            oval.centerX() - Utils.dpToPixel(context, 30f),
+            oval.centerY() + Utils.dpToPixel(context, 60f), Utils.dpToPixel(context, 10f), paint
+        )
+        canvas?.drawCircle(
+            oval.centerX(),
+            oval.centerY() + Utils.dpToPixel(context, 60f), Utils.dpToPixel(context, 10f), paint
+        )
+        canvas?.drawCircle(
+            oval.centerX() + Utils.dpToPixel(context, 30f),
+            oval.centerY() + Utils.dpToPixel(context, 60f), Utils.dpToPixel(context, 10f), paint
+        )
+    }
+
+    private fun drawIteratorCircle(
+        paint: Paint,
+        canvas: Canvas?,
+        x: Float,
+        y: Float,
+        isCurrent: Boolean
+    ) {
+        if (isCurrent) {
+            paint.color = Color.GREEN
+            paint.style = Paint.Style.FILL
+
+            canvas?.drawCircle(x, y, Utils.dpToPixel(context, 10f), paint)
+        }
     }
 
     fun setMap(diagramElements: TreeMap<String, Account>) {
@@ -130,12 +206,29 @@ class CircleDiagramView constructor(
         invalidate()
     }
 
-    fun setTotalAmount(value: Double) {
-        totalAmount = Utils.roundOffDecimal(value)
+    fun setTotalAmount(valueUsd: Double, valueEur: Double, valueByn: Double) {
+        totalAmount = Utils.roundOffDecimal(valueUsd)
+        totalEurAmount = Utils.roundOffDecimal(valueEur)
+        totalBynAmount = Utils.roundOffDecimal(valueByn)
         invalidate()
     }
 
     fun redraw() {
         invalidate()
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                if (currentCurrencyIndex == 2) {
+                    currentCurrencyIndex = 0
+                    invalidate()
+                    return true
+                }
+                currentCurrencyIndex++
+                invalidate()
+            }
+        }
+        return super.onTouchEvent(event)
     }
 }

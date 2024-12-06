@@ -3,9 +3,9 @@ package com.misterioesf.finance.viewModel
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.misterioesf.finance.ColorSetter
-import com.misterioesf.finance.data.entity.Currencies
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.data.entity.Course
+import com.misterioesf.finance.data.entity.Currencies
 import com.misterioesf.finance.repository.CurrencyRepository
 import com.misterioesf.finance.repository.FinanceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,28 +23,46 @@ class HomeViewModel @Inject constructor(
     private val repo: FinanceRepository
 ) : BaseViewModel(repo) {
     private val accountTreeMap = TreeMap<String, Account>()  // * msf + stateFlow
-    private val _currencyCourse = MutableStateFlow<Course?>(null)
+    private val _usdCourse = MutableStateFlow<Course?>(null)
+    private val _eurCourse = MutableStateFlow<Course?>(null)
 
-    private var totalAmount = 0.0
-    private var rate = 0f
-    private var totalAmountCurrency = Currencies.USD
+    private var usdTotalAmount = 0.0
+    private var eurTotalAmount = 0.0
+    private var bynTotalAmount = 0.0
+    private var usdRate = 1f
+    private var eurRate = 1f
     private var isAccountsAreSet = false
-    private var isCurrencyAreSet = false
+    private var isUsdCurrencyAreSet = false
+    private var isEurCurrencyAreSet = false
 
-    val currencyCourse = _currencyCourse.asStateFlow()
+    val usdCourse = _usdCourse.asStateFlow()
+    val eurCourse = _eurCourse.asStateFlow()
 
     init {
-        getCurrencyCourse()
+        getUSDCourse()
+        getEURCourse()
     }
 
-    private fun getCurrencyCourse() {
+    private fun getUSDCourse() {
         viewModelScope.launch {
             try {
-                currencyRepository.getCurrencyCourse().collect() {
-                    _currencyCourse.value = it
+                currencyRepository.getUSDCourse().collect() {
+                    _usdCourse.value = it
                 }
             } catch (e: Exception) {
-                Log.e("WWWWWWWWWWWWWW", e.stackTraceToString())
+                Log.e("HomeViewModel", e.stackTraceToString())
+            }
+        }
+    }
+
+    private fun getEURCourse() {
+        viewModelScope.launch {
+            try {
+                currencyRepository.getEURCourse().collect() {
+                    _eurCourse.value = it
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", e.stackTraceToString())
             }
         }
     }
@@ -64,32 +82,60 @@ class HomeViewModel @Inject constructor(
                     account.color = ColorSetter.getNextColor()
                 }
             }
-            setAmount(true)
+            setUsdAmount(true)
+            setEurAmount(true)
 
             accountTreeMap
         }
     }
 
-    // it too long to wait currency api call, init with sp value and then just update it
-    fun setAmount(rate: Float) {
-        isCurrencyAreSet = true
-        this.rate = rate
-        if (isAccountsAreSet && isCurrencyAreSet)
-            setTotalAmount()
+    fun setUsdAmount(rate: Float) {
+        isUsdCurrencyAreSet = true
+        this.usdRate = rate
+        if (isAccountsAreSet && isUsdCurrencyAreSet && isEurCurrencyAreSet)
+            setAllTotalAmounts()
     }
 
-    private fun setAmount(isAccount: Boolean) {
+    private fun setUsdAmount(isAccount: Boolean) {
+        isAccountsAreSet = true
+        if (isAccountsAreSet && isUsdCurrencyAreSet && isEurCurrencyAreSet)
+            setAllTotalAmounts()
+    }
+
+    fun setEurAmount(rate: Float) {
+        isEurCurrencyAreSet = true
+        this.eurRate = rate
+        if (isAccountsAreSet && isUsdCurrencyAreSet && isEurCurrencyAreSet)
+            setAllTotalAmounts()
+    }
+
+    private fun setEurAmount(isAccount: Boolean) {
         isAccountsAreSet = isAccount
-        if (isAccountsAreSet && isCurrencyAreSet)
-            setTotalAmount()
+        if (isAccountsAreSet && isUsdCurrencyAreSet && isEurCurrencyAreSet)
+            setAllTotalAmounts()
     }
 
-    private fun setTotalAmount() {
-        totalAmount = 0.0
+    private fun setAllTotalAmounts() {
+        eurTotalAmount = 0.0
+        usdTotalAmount = 0.0
+        bynTotalAmount = 0.0
         accountTreeMap.forEach { account ->
             when (Currencies.valueOf(account.value.currency)) {
-                Currencies.USD -> totalAmount += account.value.sum
-                Currencies.BYN -> totalAmount += account.value.sum / rate
+                Currencies.USD -> {
+                    eurTotalAmount += account.value.sum * usdRate / eurRate
+                    usdTotalAmount += account.value.sum
+                    bynTotalAmount += account.value.sum * usdRate
+                }
+                Currencies.BYN -> {
+                    eurTotalAmount += account.value.sum / eurRate
+                    usdTotalAmount += account.value.sum / usdRate
+                    bynTotalAmount += account.value.sum
+                }
+                Currencies.EU -> {
+                    eurTotalAmount += account.value.sum
+                    usdTotalAmount += account.value.sum * eurRate / usdRate
+                    bynTotalAmount += account.value.sum * eurRate
+                }
                 else -> {}
             }
         }
@@ -99,9 +145,18 @@ class HomeViewModel @Inject constructor(
         return accountTreeMap
     }
 
-    fun getTotalAmount(): Double {
+    fun getUsdTotalAmount(): Double {
+        isUsdCurrencyAreSet = false
+        return usdTotalAmount
+    }
+
+    fun getEurTotalAmount(): Double {
         isAccountsAreSet = false
-        isCurrencyAreSet = false
-        return totalAmount
+        isEurCurrencyAreSet = false
+        return eurTotalAmount
+    }
+
+    fun getBynTotalAmount(): Double {
+        return bynTotalAmount
     }
 }
