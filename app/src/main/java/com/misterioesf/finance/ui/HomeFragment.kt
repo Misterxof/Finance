@@ -3,6 +3,7 @@ package com.misterioesf.finance.ui
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -111,7 +112,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToAccountFragment(account: Account?) {
-        val action = AccountListFragmentDirections.actionAllAccountsFragmentToAccountHomeFragment(
+        val action = HomeFragmentDirections.actionHomeFragmentToAccountHomeFragment(
             account
         )
         requireView().findNavController().navigate(action)

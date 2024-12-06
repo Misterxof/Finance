@@ -1,11 +1,15 @@
 package com.misterioesf.finance.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import androidx.core.view.get
+import androidx.core.view.isEmpty
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +29,8 @@ class TransfersListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TransfersListAdapter
     private lateinit var accountSpinner: Spinner
+    private lateinit var menu: Menu
+    private var isVisible = true
 
     private var accountsList: List<Account>? = null
 
@@ -46,6 +52,10 @@ class TransfersListFragment : Fragment() {
         accountSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 updateCurrentList()
+                if (accountsList.isNullOrEmpty()) {
+                    isVisible = false
+                    updateMenu()
+                }
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
@@ -64,7 +74,12 @@ class TransfersListFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.add_trasfer_menu, menu)
-        if (viewModel.getAccountId() == -1) setHasOptionsMenu(false)
+        this.menu = menu
+
+        if (viewModel.getAccountId() == -1) {
+            isVisible = false
+            updateMenu()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -91,7 +106,9 @@ class TransfersListFragment : Fragment() {
                 accountSpinner.adapter = spinnerArrayAdapter
 
                 if (viewModel.getAccountId() == -1) updateAccountId()
-                else accountSpinner.setSelection(viewModel.getAccountId() - 1)
+                else {
+                    accountSpinner.setSelection(viewModel.getAccountIndexById(viewModel.getAccountId(), accountsList))
+                }
             }
             updateCurrentList()
         }
@@ -104,24 +121,14 @@ class TransfersListFragment : Fragment() {
             ) { transfers -> transfers?.let { updateUI(transfers) } }
         } else {
             updateAccountId()
-            setHasOptionsMenu(true)
+            if (!accountsList.isNullOrEmpty()) {
+                isVisible = true
+                updateMenu()
+            }
             viewModel.getTransfersById(viewModel.getAccountId()).observe(
                 viewLifecycleOwner
             ) { transfers -> transfers?.let { updateUI(transfers) } }
         }
-    }
-
-    private fun getAccountIdByName(name: String): Int? {
-        if (!accountsList.isNullOrEmpty()) {
-            accountsList!!.forEach {
-                if (it.name == name) {
-                    viewModel.setCurrency(Currencies.valueOf(it.currency))
-                    return it.id
-                }
-            }
-        }
-
-        return null
     }
 
     private fun updateUI(transfers: List<Transfer>) {
@@ -132,8 +139,20 @@ class TransfersListFragment : Fragment() {
     }
 
     private fun updateAccountId() {
-        val accId = getAccountIdByName(accountSpinner.selectedItem.toString()) ?: -1
-        viewModel.setAccountId(accId)
+        if (!accountsList.isNullOrEmpty()){
+            val accId = viewModel.getAccountIdByName(accountSpinner.selectedItem.toString(), accountsList) ?: -1
+            viewModel.setAccountId(accId)
+        }
+    }
+
+    private fun updateMenu() {
+        if (!isVisible) {
+            menu.getItem(0).isVisible = false
+            menu.getItem(0).isEnabled = false
+        } else {
+            menu.getItem(0).isVisible = true
+            menu.getItem(0).isEnabled = true
+        }
     }
 
     private fun navigateToTransferFragment(transfer: Transfer?) {

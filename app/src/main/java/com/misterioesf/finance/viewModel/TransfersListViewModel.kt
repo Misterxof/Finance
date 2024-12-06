@@ -26,6 +26,26 @@ class TransfersListViewModel : ViewModel() {
         }
     }
 
+    fun getAccountIndexById(id: Int, accountsList: List<Account>?) : Int {
+        accountsList?.forEachIndexed { i, acc ->
+            if (acc.id == id) return i
+        }
+        return 0
+    }
+
+    fun getAccountIdByName(name: String, accountsList: List<Account>?): Int? {
+        if (!accountsList.isNullOrEmpty()) {
+            accountsList!!.forEach {
+                if (it.name == name) {
+                    setCurrency(Currencies.valueOf(it.currency))
+                    return it.id
+                }
+            }
+        }
+
+        return null
+    }
+
     fun getAccountId() = accountId
     fun setAccountId(value: Int) { accountId = value }
 
