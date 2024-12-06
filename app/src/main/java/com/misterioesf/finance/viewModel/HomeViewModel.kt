@@ -3,20 +3,26 @@ package com.misterioesf.finance.viewModel
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.misterioesf.finance.ColorSetter
-import com.misterioesf.finance.Currencies
+import com.misterioesf.finance.data.entity.Currencies
 import com.misterioesf.finance.dao.entity.Account
-import com.misterioesf.finance.dao.entity.Course
+import com.misterioesf.finance.data.entity.Course
 import com.misterioesf.finance.repository.CurrencyRepository
+import com.misterioesf.finance.repository.FinanceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
+import javax.inject.Inject
 
-class HomeViewModel : BaseViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val currencyRepository: CurrencyRepository,
+    private val repo: FinanceRepository
+) : BaseViewModel(repo) {
     private val accountTreeMap = TreeMap<String, Account>()  // * msf + stateFlow
-    private val currencyRepository = CurrencyRepository.getCurrencyRepository()
     private val _currencyCourse = MutableStateFlow<Course?>(null)
 
     private var totalAmount = 0.0

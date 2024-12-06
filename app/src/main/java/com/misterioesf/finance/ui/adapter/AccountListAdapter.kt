@@ -11,8 +11,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
-class AccountListAdapter(var accountList: List<Account>,val itemViewId: Int, val onClick: (account: Account?) -> Unit) :
+class AccountListAdapter @AssistedInject constructor(
+    @Assisted var accountList: List<Account>,
+    @Assisted val itemViewId: Int,
+    @Assisted val onClick: (account: Account?) -> Unit
+) :
     RecyclerView.Adapter<AccountListAdapter.AccountListItemHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountListItemHolder {
@@ -30,7 +36,8 @@ class AccountListAdapter(var accountList: List<Account>,val itemViewId: Int, val
         holder.bind(account)
     }
 
-    inner class AccountListItemHolder(view: View, val onClick: (account: Account?) -> Unit) : RecyclerView.ViewHolder(view), OnClickListener {
+    inner class AccountListItemHolder(view: View, val onClick: (account: Account?) -> Unit) :
+        RecyclerView.ViewHolder(view), OnClickListener {
         private val accountName: TextView = itemView.findViewById(R.id.account_name)
         private val accountAmount: TextView = itemView.findViewById(R.id.account_ammount)
         private var accountColor: ImageView? = null

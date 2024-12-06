@@ -4,12 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.repository.FinanceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AccountHomeViewModel : ViewModel() {
-    private val repository = FinanceRepository.getFinanceRepository()
-
+@HiltViewModel
+class AccountHomeViewModel @Inject constructor(private val repository: FinanceRepository): ViewModel() {
     fun addNewAccount(account: Account) {
         repository.addNewAccount(account)
     }

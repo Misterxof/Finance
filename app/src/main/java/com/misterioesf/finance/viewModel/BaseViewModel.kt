@@ -5,12 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.repository.FinanceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-open class BaseViewModel : ViewModel() {
-    protected val repository = FinanceRepository.getFinanceRepository()
-
+@HiltViewModel
+open class BaseViewModel @Inject constructor(protected val repository: FinanceRepository): ViewModel() {
     fun getAccountList(): LiveData<List<Account>> {
         return repository.getAllAccounts()
     }

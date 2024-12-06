@@ -7,19 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
-import com.misterioesf.finance.Currencies
+import com.misterioesf.finance.data.entity.Currencies
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.viewModel.AccountHomeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AccountHomeFragment : Fragment() {
     private val args: AccountHomeFragmentArgs by navArgs()
     private var account: Account? = null
+    private val accountHomeViewModel: AccountHomeViewModel by viewModels()
 
-    lateinit var accountHomeViewModel: AccountHomeViewModel
     lateinit var accountName: EditText
     lateinit var accountAmount: TextView
     lateinit var accountSpinner: Spinner
@@ -58,8 +60,6 @@ class AccountHomeFragment : Fragment() {
         addAccountConfirmButton.setOnClickListener {
             addNewAccount()
         }
-
-        accountHomeViewModel = ViewModelProvider(this)[AccountHomeViewModel::class.java]
 
         deleteAccountImageButton.setOnClickListener {
             AlertDialog.Builder(this.context)

@@ -57,7 +57,7 @@
             android:defaultValue="-1" />
         <argument
             android:name="currency"
-            app:argType="com.misterioesf.finance.Currencies"
+            app:argType="com.misterioesf.finance.data.entity.Currencies"
             android:defaultValue="USD" />
     </fragment>
     <fragment

@@ -1,4 +1,4 @@
-package com.misterioesf.finance.dao.entity
+package com.misterioesf.finance.data.entity
 
 data class User(
     val login: String,

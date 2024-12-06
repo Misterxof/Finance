@@ -2,15 +2,18 @@ package com.misterioesf.finance.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.misterioesf.finance.Currencies
+import com.misterioesf.finance.data.entity.Currencies
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.dao.entity.Transfer
 import com.misterioesf.finance.repository.FinanceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import javax.inject.Inject
 
-class TransfersListViewModel : ViewModel() {
-    private val financeRepository = FinanceRepository.getFinanceRepository()
+@HiltViewModel
+class TransfersListViewModel @Inject constructor(
+    private val financeRepository: FinanceRepository
+) : ViewModel() {
     private var accountId: Int = -1
     private var currency = Currencies.BYN
 

@@ -12,12 +12,16 @@ import android.view.View
 import com.misterioesf.finance.R
 import com.misterioesf.finance.Utils
 import com.misterioesf.finance.dao.entity.Account
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.WithFragmentBindings
 import java.util.*
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
 
 const val TAG = "CIRCLE"
 
+@AndroidEntryPoint
+@WithFragmentBindings
 class CircleDiagramView constructor(
     context: Context,
     attributeSet: AttributeSet? = null

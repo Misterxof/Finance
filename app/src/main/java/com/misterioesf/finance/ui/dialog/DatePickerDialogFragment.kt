@@ -5,8 +5,10 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.widget.DatePicker
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
+@AndroidEntryPoint
 class DatePickerDialogFragment: DialogFragment(), DatePickerDialog.OnDateSetListener {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

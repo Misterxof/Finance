@@ -1,4 +1,4 @@
-package com.misterioesf.finance
+package com.misterioesf.finance.ui
 
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -7,12 +7,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.misterioesf.finance.viewModel.MainVIewModel
+import com.misterioesf.finance.R
+import dagger.hilt.android.AndroidEntryPoint
 
 const val PERMISSIONS_CODE = 100
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private lateinit var mainVIewModel: MainVIewModel
     private val permissionList = arrayOf<String>("android.permission.READ_SMS")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +27,6 @@ class MainActivity : AppCompatActivity() {
 
         bottomNavigationView.setupWithNavController(navController)
 
-        mainVIewModel = ViewModelProvider(this)[MainVIewModel::class.java]
         requestPermissions(permissionList, PERMISSIONS_CODE)
     }
 

@@ -5,8 +5,9 @@ import com.misterioesf.finance.dao.FinanceDao
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.dao.entity.Transfer
 import java.util.concurrent.Executors
+import javax.inject.Inject
 
-class FinanceRepository(val dao: FinanceDao) {
+class FinanceRepository @Inject constructor(val dao: FinanceDao) {
     private val executor = Executors.newSingleThreadExecutor()
 
     fun getAllTransfers(): LiveData<List<Transfer>> {
@@ -51,17 +52,5 @@ class FinanceRepository(val dao: FinanceDao) {
 
     suspend fun deleteAccount(account: Account) {
         dao.deleteAccount(account)
-    }
-
-    companion object {
-        private var repository: FinanceRepository? = null
-
-        fun initialize(dao: FinanceDao) {
-            if (repository == null) repository = FinanceRepository(dao)
-        }
-
-        fun getFinanceRepository(): FinanceRepository {
-            return repository ?: throw java.lang.IllegalStateException("FinanceRepository must be init")
-        }
     }
 }

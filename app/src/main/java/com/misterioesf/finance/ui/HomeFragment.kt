@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -18,19 +19,27 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
+import com.misterioesf.finance.di.AccountListAdapterFactory
 import com.misterioesf.finance.ui.adapter.AccountListAdapter
 import com.misterioesf.finance.viewModel.HomeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
     private lateinit var diagramView: CircleDiagramView
-    private lateinit var homeViewModel: HomeViewModel
     private lateinit var courseTextView: TextView
     private lateinit var homeAccountListRecyclerView: RecyclerView
     private lateinit var adapter: AccountListAdapter
     private lateinit var sharedPreferences: SharedPreferences
+
+    private val homeViewModel: HomeViewModel by viewModels()
+
+    @Inject
+    lateinit var accountListAdapterFactory: AccountListAdapterFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,16 +68,13 @@ class HomeFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
         diagramView = view.findViewById(R.id.circleDiagram)
         courseTextView = view.findViewById(R.id.course_text_view)
-        adapter =
-            AccountListAdapter(
+        adapter = accountListAdapterFactory.create(
                 emptyList(),
                 R.layout.account_list_item_colored
             ) { navigateToAccountFragment(it) }
         homeAccountListRecyclerView = view.findViewById(R.id.home_account_list_rv)
         homeAccountListRecyclerView.adapter = adapter
         homeAccountListRecyclerView.layoutManager = LinearLayoutManager(context)
-
-        homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
         return view
     }
@@ -94,7 +100,7 @@ class HomeFragment : Fragment() {
 
     private fun updateUI(accountList: List<Account>) {
         adapter =
-            AccountListAdapter(
+            accountListAdapterFactory.create(
                 accountList,
                 R.layout.account_list_item_colored
             ) { navigateToAccountFragment(it) }

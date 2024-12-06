@@ -1,10 +1,7 @@
-package com.misterioesf.finance
+package com.misterioesf.finance.network
 
-import com.misterioesf.finance.dao.entity.Course
-import com.misterioesf.finance.dao.entity.User
+import com.misterioesf.finance.data.entity.Course
 import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface CurrencyService {
 

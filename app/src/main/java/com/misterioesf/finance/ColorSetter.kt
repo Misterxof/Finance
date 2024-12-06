@@ -11,8 +11,10 @@ class ColorSetter {
         private var color = Color.argb(a, r, g, b)
 
         fun getNextColor(): Int {
-            g -= 30
-            b += 30
+            if (g > 0) g -= 30
+            else g = 255
+            if (b < 255) b += 30
+            else b = 0
             return Color.argb(a, r, g, b)
         }
 

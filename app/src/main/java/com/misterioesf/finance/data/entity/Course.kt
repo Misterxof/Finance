@@ -1,4 +1,4 @@
-package com.misterioesf.finance.dao.entity
+package com.misterioesf.finance.data.entity
 
 import com.google.gson.annotations.SerializedName
 

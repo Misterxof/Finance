@@ -7,14 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.misterioesf.finance.Currencies
+import com.misterioesf.finance.data.entity.Currencies
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Transfer
 import com.misterioesf.finance.ui.dialog.DatePickerDialogFragment
 import com.misterioesf.finance.viewModel.TransferViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -22,17 +23,13 @@ import java.util.*
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "TRANSFER"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [TransferFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+@AndroidEntryPoint
 class TransferFragment : Fragment() {
-    private lateinit var viewModel: TransferViewModel
     private lateinit var currency: Currencies
     private lateinit var date: Date
     private lateinit var datePickerFragment: DatePickerDialogFragment
 
+    private val viewModel: TransferViewModel by viewModels()
     private val args: TransferFragmentArgs by navArgs()
     private var transfer: Transfer? = null
     private var accountId: Int = -1
@@ -50,7 +47,6 @@ class TransferFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_transfer, container, false)
-        viewModel = ViewModelProvider(this)[TransferViewModel::class.java]
         amountEditText = view.findViewById(R.id.amount_edit_text)
         descriptionEditText = view.findViewById(R.id.description_edit_text)
         pickDateButton = view.findViewById(R.id.pick_date_button)

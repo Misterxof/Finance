@@ -1,4 +1,4 @@
-package com.misterioesf.finance
+package com.misterioesf.finance.data.entity
 
 enum class Currencies {
     BYN, USD, EU;

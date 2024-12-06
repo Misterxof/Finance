@@ -10,10 +10,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Transfer
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
-class TransfersListAdapter(
-    var transfersList: List<Transfer>,
-    val onTransferClick: (transfer: Transfer) -> Unit
+class TransfersListAdapter @AssistedInject constructor(
+    @Assisted var transfersList: List<Transfer>,
+    @Assisted val onTransferClick: (transfer: Transfer) -> Unit
 ) : RecyclerView.Adapter<TransfersListAdapter.TransferHolder>() {
 
 

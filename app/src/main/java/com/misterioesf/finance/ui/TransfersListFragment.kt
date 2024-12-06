@@ -1,47 +1,48 @@
 package com.misterioesf.finance.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Spinner
-import androidx.core.view.get
-import androidx.core.view.isEmpty
-import androidx.core.view.size
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.misterioesf.finance.Currencies
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
 import com.misterioesf.finance.dao.entity.Transfer
+import com.misterioesf.finance.di.TransfersListAdapterFactory
 import com.misterioesf.finance.ui.adapter.TransfersListAdapter
 import com.misterioesf.finance.viewModel.TransfersListViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class TransfersListFragment : Fragment() {
-    private lateinit var viewModel: TransfersListViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TransfersListAdapter
     private lateinit var accountSpinner: Spinner
     private lateinit var menu: Menu
-    private var isVisible = true
 
+    private val viewModel: TransfersListViewModel by viewModels()
+
+    private var isVisible = true
     private var accountsList: List<Account>? = null
+
+    @Inject
+    lateinit var transfersListAdapterFactory: TransfersListAdapterFactory
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(this)[TransfersListViewModel::class.java]
-
         val view = inflater.inflate(R.layout.fragment_transfers__list, container, false)
-        adapter = TransfersListAdapter(emptyList()) {
+        adapter = transfersListAdapterFactory.create(emptyList()) {
             navigateToTransferFragment(it)
         }
         recyclerView = view.findViewById(R.id.transfers_recycle_view) as RecyclerView
@@ -107,7 +108,12 @@ class TransfersListFragment : Fragment() {
 
                 if (viewModel.getAccountId() == -1) updateAccountId()
                 else {
-                    accountSpinner.setSelection(viewModel.getAccountIndexById(viewModel.getAccountId(), accountsList))
+                    accountSpinner.setSelection(
+                        viewModel.getAccountIndexById(
+                            viewModel.getAccountId(),
+                            accountsList
+                        )
+                    )
                 }
             }
             updateCurrentList()
@@ -132,15 +138,17 @@ class TransfersListFragment : Fragment() {
     }
 
     private fun updateUI(transfers: List<Transfer>) {
-        adapter = TransfersListAdapter(transfers) {
+        adapter = transfersListAdapterFactory.create(transfers) {
             navigateToTransferFragment(it)
         }
         recyclerView.adapter = adapter
     }
 
     private fun updateAccountId() {
-        if (!accountsList.isNullOrEmpty()){
-            val accId = viewModel.getAccountIdByName(accountSpinner.selectedItem.toString(), accountsList) ?: -1
+        if (!accountsList.isNullOrEmpty()) {
+            val accId =
+                viewModel.getAccountIdByName(accountSpinner.selectedItem.toString(), accountsList)
+                    ?: -1
             viewModel.setAccountId(accId)
         }
     }

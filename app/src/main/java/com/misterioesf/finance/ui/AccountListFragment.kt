@@ -3,6 +3,7 @@ package com.misterioesf.finance.ui
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
@@ -10,13 +11,20 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
+import com.misterioesf.finance.di.AccountListAdapterFactory
 import com.misterioesf.finance.ui.adapter.AccountListAdapter
 import com.misterioesf.finance.viewModel.AccountListViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AccountListFragment : Fragment() {
+    private val accountListViewModel: AccountListViewModel by viewModels()
+
+    @Inject
+    lateinit var accountListAdapterFactory: AccountListAdapterFactory
     lateinit var adapter: AccountListAdapter
-    lateinit var accountListViewModel: AccountListViewModel
     lateinit var accountListRecyclerView: RecyclerView
 
     override fun onCreateView(
@@ -25,7 +33,7 @@ class AccountListFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_account_list, container, false)
         adapter =
-            AccountListAdapter(emptyList(), R.layout.account_list_item) {
+            accountListAdapterFactory.create(emptyList(), R.layout.account_list_item) {
                 navigateToAccountFragment(
                     it
                 )
@@ -33,8 +41,6 @@ class AccountListFragment : Fragment() {
         accountListRecyclerView = view.findViewById(R.id.account_list)
         accountListRecyclerView.adapter = adapter
         accountListRecyclerView.layoutManager = LinearLayoutManager(context)
-
-        accountListViewModel = ViewModelProvider(this)[AccountListViewModel::class.java]
 
         setHasOptionsMenu(true)
 
@@ -73,7 +79,7 @@ class AccountListFragment : Fragment() {
 
     fun updateUI(accountList: List<Account>) {
         adapter =
-            AccountListAdapter(accountList, R.layout.account_list_item) {
+            accountListAdapterFactory.create(accountList, R.layout.account_list_item) {
                 navigateToAccountFragment(
                     it
                 )
