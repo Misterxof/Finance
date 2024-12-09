@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDirections
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -88,9 +89,16 @@ class AccountListFragment : Fragment() {
     }
 
     private fun navigateToAccountFragment(account: Account?) {
-        val action = AccountListFragmentDirections.actionAllAccountsFragmentToAccountHomeFragment(
-            account
-        )
-        requireView().findNavController().navigate(action)
+        var action: NavDirections?
+
+        if (account == null) {
+            action = AccountListFragmentDirections.actionAllAccountsFragmentToAccountHomeFragment()
+        } else {
+            action = AccountListFragmentDirections.actionAllAccountsFragmentToAccountInfoFragment(
+                account
+            )
+        }
+
+        requireView().findNavController().navigate(action!!)
     }
 }

@@ -3,7 +3,6 @@ package com.misterioesf.finance.ui
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
+import com.misterioesf.finance.data.entity.Segment
 import com.misterioesf.finance.di.AccountListAdapterFactory
 import com.misterioesf.finance.ui.adapter.AccountListAdapter
 import com.misterioesf.finance.viewModel.HomeViewModel
@@ -25,11 +25,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
-    private lateinit var diagramView: CircleDiagramView
+    private lateinit var diagramView: HomeCircleDiagram
     private lateinit var courseTextView: TextView
     private lateinit var eurCourseTextView: TextView
     private lateinit var homeAccountListRecyclerView: RecyclerView
@@ -84,7 +85,7 @@ class HomeFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch {
-            diagramView.setMap(homeViewModel.getAmountMap())
+            diagramView.setMap(homeViewModel.getAmountMap() as TreeMap<String, Segment>)
         }
     }
 
@@ -146,7 +147,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToAccountFragment(account: Account?) {
-        val action = HomeFragmentDirections.actionHomeFragmentToAccountHomeFragment(
+        val action = HomeFragmentDirections.actionHomeFragmentToAccountInfoFragment(
             account
         )
         requireView().findNavController().navigate(action)

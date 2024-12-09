@@ -11,8 +11,8 @@
         android:label="@string/menu_home_title"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_homeFragment_to_accountHomeFragment"
-            app:destination="@id/accountHomeFragment" />
+            android:id="@+id/action_homeFragment_to_accountInfoFragment"
+            app:destination="@id/accountInfoFragment" />
     </fragment>
 
     <fragment
@@ -40,6 +40,9 @@
             app:exitAnim="@animator/slide_out_left"
             app:popEnterAnim="@android:anim/slide_in_left"
             app:popExitAnim="@android:anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_allAccountsFragment_to_accountInfoFragment"
+            app:destination="@id/accountInfoFragment" />
     </fragment>
 
     <fragment
@@ -65,6 +68,12 @@
         android:name="com.misterioesf.finance.ui.AccountHomeFragment"
         android:label="fragment_account_home"
         tools:layout="@layout/fragment_account_home" >
+    </fragment>
+    <fragment
+        android:id="@+id/accountInfoFragment"
+        android:name="com.misterioesf.finance.ui.AccountInfoFragment"
+        android:label="fragment_account_info"
+        tools:layout="@layout/fragment_account_info" >
         <argument
             android:name="account"
             app:argType="com.misterioesf.finance.dao.entity.Account"

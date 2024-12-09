@@ -1,9 +1,7 @@
 package com.misterioesf.finance.dao.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
+import androidx.room.*
+import com.misterioesf.finance.data.entity.Segment
 import java.util.*
 
 @Entity(foreignKeys = [
@@ -23,4 +21,15 @@ data class Transfer(
     @ColumnInfo(name = "is_bill")var isBill: Boolean,
     var date: Date,
     @ColumnInfo(name = "account_id") var accountId: Int
-): java.io.Serializable
+): java.io.Serializable, Segment {
+    //  later will be gone (in TAGS update)
+    @Ignore
+    var color : Int = 0xFF000000.toInt()
+    override fun getValue(): Double {
+        return sum
+    }
+
+    override fun getSegmentColor(): Int {
+        return color
+    }
+}

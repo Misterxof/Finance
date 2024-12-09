@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:finance="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/color_linear_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/account_info_color_image_view"
+            android:layout_width="16dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/black" />
+
+        <Spinner
+            android:id="@+id/account_info_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:entries="@array/transfers_sort_by_list" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider_first"
+        style="@style/Divider"
+        android:layout_marginTop="16dp"
+        android:layout_height="8dp"
+        app:layout_constraintBottom_toTopOf="@id/circle_Diagram"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/color_linear_Layout" />
+
+    <ImageButton
+        android:id="@+id/delete_account_img_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:padding="8dp"
+        android:background="@drawable/round_button"
+        android:elevation="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/divider_first"
+        app:srcCompat="@android:drawable/ic_menu_delete" />
+
+    <com.misterioesf.finance.ui.AccountInfoCircleDiagram
+        android:id="@+id/circle_Diagram"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider_first"
+        app:layout_constraintBottom_toTopOf="@id/divider"
+        app:layout_constraintVertical_weight="5"/>
+
+    <View
+        android:id="@+id/divider"
+        style="@style/Divider"
+        android:layout_marginTop="16dp"
+        android:layout_height="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/info_account_list_rv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/circle_Diagram" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/info_account_list_rv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_weight="3"
+        tools:listitem="@layout/account_list_item"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

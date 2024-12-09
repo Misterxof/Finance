@@ -1,24 +1,24 @@
 package com.misterioesf.finance.ui
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.navArgs
-import com.misterioesf.finance.data.entity.Currencies
 import com.misterioesf.finance.R
 import com.misterioesf.finance.dao.entity.Account
+import com.misterioesf.finance.data.entity.Currencies
 import com.misterioesf.finance.viewModel.AccountHomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class AccountHomeFragment : Fragment() {
-    private val args: AccountHomeFragmentArgs by navArgs()
     private var account: Account? = null
     private val accountHomeViewModel: AccountHomeViewModel by viewModels()
 
@@ -26,7 +26,6 @@ class AccountHomeFragment : Fragment() {
     lateinit var accountAmount: TextView
     lateinit var accountSpinner: Spinner
     lateinit var addAccountConfirmButton: Button
-    lateinit var deleteAccountImageButton: ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,14 +37,8 @@ class AccountHomeFragment : Fragment() {
         accountAmount = view.findViewById(R.id.account_amount_text_view)
         accountSpinner = view.findViewById(R.id.account_currency_spinner)
         addAccountConfirmButton = view.findViewById(R.id.add_new_account_button)
-        deleteAccountImageButton = view.findViewById(R.id.delete_account_img_button)
 
-        account = args.account
-
-        if (account == null) {
-            deleteAccountImageButton.isEnabled = false
-            deleteAccountImageButton.visibility = View.GONE
-        } else {
+        if (account != null) {
             accountSpinner.isEnabled = false
             accountSpinner.visibility = View.GONE
             addAccountConfirmButton.isEnabled = false
@@ -59,17 +52,6 @@ class AccountHomeFragment : Fragment() {
 
         addAccountConfirmButton.setOnClickListener {
             addNewAccount()
-        }
-
-        deleteAccountImageButton.setOnClickListener {
-            AlertDialog.Builder(this.context)
-                .setTitle(R.string.delete_account_title)
-                .setMessage(R.string.delete_account_description)
-                .setPositiveButton(R.string.yes) { _, _ ->
-                    account?.let { accountHomeViewModel.deleteAccount(it) }
-                    requireView().findNavController().navigateUp()
-                }
-                .setNegativeButton(R.string.no, null).show()
         }
 
         return view
