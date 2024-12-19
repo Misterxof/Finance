@@ -1,7 +1,7 @@
-package com.misterioesf.finance.dao.entity
+package com.misterioesf.finance.data.dao.entity
 
 import androidx.room.*
-import com.misterioesf.finance.data.entity.Segment
+import com.misterioesf.finance.domain.model.Segment
 import java.util.*
 
 @Entity(foreignKeys = [

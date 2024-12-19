@@ -1,7 +1,5 @@
 package com.misterioesf.finance.ui.adapter
 
-import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -10,16 +8,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
-import com.misterioesf.finance.dao.entity.Account
+import com.misterioesf.finance.data.dao.entity.Account
+import com.misterioesf.finance.data.dao.entity.Transfer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
 class AccountListAdapter @AssistedInject constructor(
-    @Assisted var accountList: List<Account>,
     @Assisted val itemViewId: Int,
     @Assisted val onClick: (account: Account?) -> Unit
 ) :
     RecyclerView.Adapter<AccountListAdapter.AccountListItemHolder>() {
+
+    private val accountList = mutableListOf<Account>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountListItemHolder {
         val view =
@@ -34,6 +34,12 @@ class AccountListAdapter @AssistedInject constructor(
     override fun onBindViewHolder(holder: AccountListItemHolder, position: Int) {
         val account = accountList[position]
         holder.bind(account)
+    }
+
+    fun updateData(list: List<Account>) {
+        accountList.clear()
+        accountList.addAll(list)
+        notifyDataSetChanged()
     }
 
     inner class AccountListItemHolder(view: View, val onClick: (account: Account?) -> Unit) :

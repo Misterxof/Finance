@@ -1,20 +1,18 @@
-package com.misterioesf.finance.dao
+package com.misterioesf.finance.data.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import com.misterioesf.finance.dao.entity.Account
-import com.misterioesf.finance.dao.entity.Transfer
+import androidx.room.*
+import com.misterioesf.finance.data.dao.entity.Account
+import com.misterioesf.finance.data.dao.entity.Transfer
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FinanceDao {
     @Query("SELECT * FROM transfer")
-    fun getAllTransfers(): LiveData<List<Transfer>>
+    fun getAllTransfers(): Flow<List<Transfer>>
 
     @Query("SELECT * FROM transfer WHERE account_id = :accountId")
-    fun getAllTransfersByAccountId(accountId: Int): LiveData<List<Transfer>>
+    fun getAllTransfersByAccountId(accountId: Int): Flow<List<Transfer>>
 
     @Query("SELECT SUM(sum) FROM transfer WHERE account_id = :accountId AND is_bill = 0")
     fun getAccountAmountById(accountId: Int): Double
@@ -26,13 +24,25 @@ interface FinanceDao {
     fun getAllAccounts(): LiveData<List<Account>>
 
     @Query("SELECT * FROM account")
-    fun getAllAccountsList(): List<Account>
+    fun getAllAccountsList(): Flow<List<Account>>
+
+    @Query("SELECT * FROM account WHERE id = :accountId")
+    fun getAccountById(accountId: Int): Flow<Account>
+
+    @Query("SELECT * FROM transfer WHERE id = :transferId")
+    fun getTransferById(transferId: Int): Flow<Transfer>
 
     @Insert
     fun addNewTransfer(transfer: Transfer)
 
     @Insert
     fun addNewAccount(account: Account)
+
+    @Update
+    fun updateAccount(account: Account)
+
+    @Update
+    fun updateTransfer(transfer: Transfer)
 
     @Delete
     fun deleteTransfer(transfer: Transfer)

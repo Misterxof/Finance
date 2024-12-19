@@ -1,6 +1,7 @@
 package com.misterioesf.finance.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -8,14 +9,19 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
-import com.misterioesf.finance.dao.entity.Account
-import com.misterioesf.finance.dao.entity.Transfer
+import com.misterioesf.finance.data.dao.entity.Account
+import com.misterioesf.finance.data.dao.entity.Transfer
 import com.misterioesf.finance.di.TransfersListAdapterFactory
+import com.misterioesf.finance.domain.model.StatefulData
+import com.misterioesf.finance.domain.model.StatefulData.LoadingState
+import com.misterioesf.finance.domain.model.StatefulData.SuccessState
 import com.misterioesf.finance.ui.adapter.TransfersListAdapter
 import com.misterioesf.finance.viewModel.TransfersListViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,12 +43,30 @@ class TransfersListFragment : Fragment() {
     @Inject
     lateinit var transfersListAdapterFactory: TransfersListAdapterFactory
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.transfersListUiState.collect {
+                    renderState(it)
+                }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.allAccounts.collect {
+                    updateSpinnerAdapter(it.data!!)
+                }
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_transfers__list, container, false)
-        adapter = transfersListAdapterFactory.create(emptyList()) {
+        adapter = transfersListAdapterFactory.create() {
             navigateToTransferFragment(it)
         }
         recyclerView = view.findViewById(R.id.transfers_recycle_view) as RecyclerView
@@ -52,11 +76,7 @@ class TransfersListFragment : Fragment() {
         accountSpinner = view.findViewById(R.id.accounts_spinner)
         accountSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                updateCurrentList()
-                if (accountsList.isNullOrEmpty()) {
-                    isVisible = false
-                    updateMenu()
-                }
+                viewModel.getNewAccountById(p2)
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
@@ -67,20 +87,10 @@ class TransfersListFragment : Fragment() {
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateSpinnerAdapter()
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.add_trasfer_menu, menu)
         this.menu = menu
-
-        if (viewModel.getAccountId() == -1) {
-            isVisible = false
-            updateMenu()
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -93,63 +103,38 @@ class TransfersListFragment : Fragment() {
         }
     }
 
-    private fun updateSpinnerAdapter() {
-        this.lifecycleScope.launch() {
-            accountsList = viewModel.getAllAccounts()   // waiting for getting all accounts
+    private fun updateSpinnerAdapter(list: List<Account>) {
+        list?.let {
+            // create and update new spinner names, filled with accounts names
+            val spinnerArrayAdapter: ArrayAdapter<String> = ArrayAdapter<String>(
+                this@TransfersListFragment.requireContext(),
+                android.R.layout.simple_spinner_item,
+                it.map { item -> item.name }.toTypedArray()
+            )
+            accountSpinner.adapter = spinnerArrayAdapter
 
-            accountsList?.let {
-                // create and update new spinner names, filled with accounts names
-                val spinnerArrayAdapter: ArrayAdapter<String> = ArrayAdapter<String>(
-                    this@TransfersListFragment.requireContext(),
-                    android.R.layout.simple_spinner_item,
-                    it.map { item -> item.name }.toTypedArray()
-                )
-                accountSpinner.adapter = spinnerArrayAdapter
-
-                if (viewModel.getAccountId() == -1) updateAccountId()
-                else {
-                    accountSpinner.setSelection(
-                        viewModel.getAccountIndexById(
-                            viewModel.getAccountId(),
-                            accountsList
-                        )
-                    )
-                }
-            }
-            updateCurrentList()
+            accountSpinner.setSelection(
+                viewModel.getAccountIndexById()
+            )
         }
     }
 
-    private fun updateCurrentList() {
-        if (viewModel.getAccountId() == -1) {
-            viewModel.transfers.observe(
-                viewLifecycleOwner
-            ) { transfers -> transfers?.let { updateUI(transfers) } }
-        } else {
-            updateAccountId()
-            if (!accountsList.isNullOrEmpty()) {
+    //  FIXME updateMenu
+    private fun renderState(state: StatefulData<List<Transfer>>) {
+        when (state) {
+            is LoadingState -> {
+                recyclerView.visibility = View.GONE
+                adapter.updateData(emptyList())
+                isVisible = false
+               // updateMenu()
+            }
+            is SuccessState -> {
                 isVisible = true
-                updateMenu()
+                //updateMenu()
+                recyclerView.visibility = View.VISIBLE
+                adapter.updateData(state.data)
             }
-            viewModel.getTransfersById(viewModel.getAccountId()).observe(
-                viewLifecycleOwner
-            ) { transfers -> transfers?.let { updateUI(transfers) } }
-        }
-    }
-
-    private fun updateUI(transfers: List<Transfer>) {
-        adapter = transfersListAdapterFactory.create(transfers) {
-            navigateToTransferFragment(it)
-        }
-        recyclerView.adapter = adapter
-    }
-
-    private fun updateAccountId() {
-        if (!accountsList.isNullOrEmpty()) {
-            val accId =
-                viewModel.getAccountIdByName(accountSpinner.selectedItem.toString(), accountsList)
-                    ?: -1
-            viewModel.setAccountId(accId)
+            else -> {}
         }
     }
 

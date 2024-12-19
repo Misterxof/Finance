@@ -1,12 +1,9 @@
-package com.misterioesf.finance.dao.entity
+package com.misterioesf.finance.data.dao.entity
 
-import android.graphics.Color
-import androidx.annotation.ColorInt
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import com.misterioesf.finance.data.entity.Segment
-import java.util.Date
+import com.misterioesf.finance.domain.model.Segment
 
 @Entity
 data class Account(

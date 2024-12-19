@@ -1,6 +1,6 @@
 package com.misterioesf.finance.network
 
-import com.misterioesf.finance.data.entity.Course
+import com.misterioesf.finance.domain.model.Course
 import retrofit2.http.GET
 
 interface CurrencyService {

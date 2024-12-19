@@ -4,15 +4,17 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
-import com.misterioesf.finance.dao.entity.Account
+import com.misterioesf.finance.data.dao.entity.Account
 import com.misterioesf.finance.di.AccountListAdapterFactory
+import com.misterioesf.finance.domain.model.StatefulData
 import com.misterioesf.finance.ui.adapter.AccountListAdapter
 import com.misterioesf.finance.viewModel.AccountListViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,37 +30,45 @@ class AccountListFragment : Fragment() {
     lateinit var adapter: AccountListAdapter
     lateinit var accountListRecyclerView: RecyclerView
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                accountListViewModel.allAccounts.collect {
+                    renderAccountList(it)
+                }
+            }
+        }
+    }
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_account_list, container, false)
+        return inflater.inflate(R.layout.fragment_account_list, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         adapter =
-            accountListAdapterFactory.create(emptyList(), R.layout.account_list_item) {
-                navigateToAccountFragment(
-                    it
-                )
+            accountListAdapterFactory.create(R.layout.account_list_item) {
+                navigateToAccountFragment(it)
             }
         accountListRecyclerView = view.findViewById(R.id.account_list)
         accountListRecyclerView.adapter = adapter
         accountListRecyclerView.layoutManager = LinearLayoutManager(context)
 
         setHasOptionsMenu(true)
-
-        return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        accountListViewModel.getAccountList().observe(viewLifecycleOwner) { accounts ->
-            accounts?.let {
-                this@AccountListFragment.lifecycleScope.launch {
-                    accounts.forEach {
-                        it.sum = accountListViewModel.setAccountAmount(it.id)
-                    }
-
-                    updateUI(accounts)
-                }
+    private fun renderAccountList(state: StatefulData<List<Account>>) {
+        when (state) {
+            is StatefulData.LoadingState -> {}
+            is StatefulData.SaveState -> {}
+            is StatefulData.SuccessState -> {
+                adapter.updateData(state.data)
             }
         }
     }
@@ -76,16 +86,6 @@ class AccountListFragment : Fragment() {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    fun updateUI(accountList: List<Account>) {
-        adapter =
-            accountListAdapterFactory.create(accountList, R.layout.account_list_item) {
-                navigateToAccountFragment(
-                    it
-                )
-            }
-        accountListRecyclerView.adapter = adapter
     }
 
     private fun navigateToAccountFragment(account: Account?) {

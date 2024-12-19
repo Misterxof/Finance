@@ -11,7 +11,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.misterioesf.finance.Utils
-import com.misterioesf.finance.data.entity.Segment
+import com.misterioesf.finance.domain.model.Segment
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.WithFragmentBindings
 import java.util.*

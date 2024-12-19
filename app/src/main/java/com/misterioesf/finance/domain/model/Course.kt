@@ -1,4 +1,4 @@
-package com.misterioesf.finance.data.entity
+package com.misterioesf.finance.domain.model
 
 import com.google.gson.annotations.SerializedName
 

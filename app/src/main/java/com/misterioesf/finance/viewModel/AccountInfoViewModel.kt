@@ -2,17 +2,18 @@ package com.misterioesf.finance.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.misterioesf.finance.dao.entity.Account
-import com.misterioesf.finance.dao.entity.Transfer
-import com.misterioesf.finance.repository.FinanceRepository
+import com.misterioesf.finance.data.dao.entity.Account
+import com.misterioesf.finance.data.dao.entity.Transfer
+import com.misterioesf.finance.data.repository.FinanceRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AccountInfoViewModel @Inject constructor(private val financeRepository: FinanceRepository) :
+class AccountInfoViewModel @Inject constructor(private val financeRepositoryImpl: FinanceRepositoryImpl) :
     ViewModel() {
     private var accountId = -1
     private var account: Account? = null
@@ -20,12 +21,12 @@ class AccountInfoViewModel @Inject constructor(private val financeRepository: Fi
     var transfersList: List<Transfer> = emptyList()
 
 
-    fun getTransfersById(accountId: Int): LiveData<List<Transfer>> {
-        return financeRepository.getAllTransfersByAccount(accountId)
+    suspend fun getTransfersById(accountId: Int): LiveData<List<Transfer>> {
+        return financeRepositoryImpl.getAllTransfersByAccount(accountId).asLiveData()
     }
 
     fun deleteAccount(account: Account) {
-        viewModelScope.launch(Dispatchers.Default) { financeRepository.deleteAccount(account) }
+        viewModelScope.launch(Dispatchers.Default) { financeRepositoryImpl.deleteAccount(account) }
     }
 
     fun getAccountId() = accountId

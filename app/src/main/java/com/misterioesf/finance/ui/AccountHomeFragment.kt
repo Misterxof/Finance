@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import com.misterioesf.finance.R
-import com.misterioesf.finance.dao.entity.Account
-import com.misterioesf.finance.data.entity.Currencies
+import com.misterioesf.finance.data.dao.entity.Account
+import com.misterioesf.finance.domain.model.Currencies
 import com.misterioesf.finance.viewModel.AccountHomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 

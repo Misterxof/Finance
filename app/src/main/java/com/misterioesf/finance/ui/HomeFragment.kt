@@ -1,7 +1,5 @@
 package com.misterioesf.finance.ui
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,15 +14,14 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
-import com.misterioesf.finance.dao.entity.Account
-import com.misterioesf.finance.data.entity.Segment
+import com.misterioesf.finance.data.dao.entity.Account
 import com.misterioesf.finance.di.AccountListAdapterFactory
+import com.misterioesf.finance.domain.model.Segment
+import com.misterioesf.finance.domain.model.StatefulData
 import com.misterioesf.finance.ui.adapter.AccountListAdapter
 import com.misterioesf.finance.viewModel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -35,7 +32,6 @@ class HomeFragment : Fragment() {
     private lateinit var eurCourseTextView: TextView
     private lateinit var homeAccountListRecyclerView: RecyclerView
     private lateinit var adapter: AccountListAdapter
-    private lateinit var sharedPreferences: SharedPreferences
 
     private val homeViewModel: HomeViewModel by viewModels()
 
@@ -44,10 +40,80 @@ class HomeFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sharedPreferences = requireContext().getSharedPreferences("SETTINGS", Context.MODE_PRIVATE)
 
-        startCollectingUSDCourse()
-        startCollectingEURCourse()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.allAccounts.collect {
+                    renderAccountList(it)
+                }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.allCourses.collect {
+                    renderCourses(it)
+                }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.totalAmounts.collect {
+                    renderTotalAmounts(it)
+                }
+            }
+        }
+    }
+
+    private fun renderAccountList(state: StatefulData<List<Account>>) {
+        when (state) {
+            is StatefulData.LoadingState -> {}
+            is StatefulData.SaveState -> {}
+            is StatefulData.SuccessState -> {
+                adapter.updateData(state.data)
+            }
+        }
+    }
+
+    private fun renderCourses(state: StatefulData<Pair<Float, Float>>) {
+        val usdText = getString(R.string.course, state.data!!.first)
+        val eurText = getString(R.string.course_eur, state.data!!.second)
+
+        when (state) {
+            is StatefulData.LoadingState -> {
+                setCoursesTextView(usdText, eurText)
+            }
+            is StatefulData.SaveState -> {
+                setCoursesTextView(usdText, eurText)
+            }
+            is StatefulData.SuccessState -> {
+                setCoursesTextView(usdText, eurText)
+            }
+        }
+    }
+
+    private fun renderTotalAmounts(state: StatefulData<HashMap<String, Any>>) {
+        when (state) {
+            is StatefulData.LoadingState -> {
+                diagramView.setTotalAmount(1.0, 1.0, 1.0)
+                diagramView.setMap(TreeMap<String, Segment>())
+            }
+            is StatefulData.SaveState -> {}
+            is StatefulData.SuccessState -> {
+                val treeMap = state.data?.get("AccountTreeMap")
+                val totalList = state.data?.get("Totals") as List<Float>
+                diagramView.setTotalAmount(
+                    totalList[0].toDouble(),
+                    totalList[1].toDouble(),
+                    totalList[2].toDouble()
+                )
+                diagramView.setMap(treeMap as TreeMap<String, Segment>)
+            }
+        }
+    }
+
+    private fun setCoursesTextView(usdText: String, eurText: String) {
+        courseTextView.text = usdText
+        eurCourseTextView.text = eurText
     }
 
     override fun onCreateView(
@@ -55,95 +121,20 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_home, container, false)
-        diagramView = view.findViewById(R.id.circleDiagram)
-        courseTextView = view.findViewById(R.id.usd_course_text_view)
-        eurCourseTextView = view.findViewById(R.id.eur_course_text_view)
-        adapter = accountListAdapterFactory.create(
-                emptyList(),
-                R.layout.account_list_item_colored
-            ) { navigateToAccountFragment(it) }
-        homeAccountListRecyclerView = view.findViewById(R.id.home_account_list_rv)
-        homeAccountListRecyclerView.adapter = adapter
-        homeAccountListRecyclerView.layoutManager = LinearLayoutManager(context)
-
-        return view
+        return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch {
-            val treeMap = homeViewModel.getTreeMap()
-            val accountList = mutableListOf<Account>()
-            treeMap.forEach { (k, v) ->
-                accountList.add(v)
-            }
-            updateUI(accountList)
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        lifecycleScope.launch {
-            diagramView.setMap(homeViewModel.getAmountMap() as TreeMap<String, Segment>)
-        }
-    }
-
-    private fun startCollectingUSDCourse() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                homeViewModel.usdCourse.collect() {
-                    if (it != null) {
-                        sharedPreferences?.edit()?.putFloat("USD", it.rate)?.apply()
-                        setTotalUSDAmount(it.rate)
-                    } else {
-                        val rate = sharedPreferences?.getFloat("USD", 1f)
-                        rate?.let { setTotalUSDAmount(it) }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun startCollectingEURCourse() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                homeViewModel.eurCourse.collect() {
-                    if (it != null) {
-                        sharedPreferences?.edit()?.putFloat("EUR", it.rate)?.apply()
-                        setTotalEUAmount(it.rate)
-                    } else {
-                        val rate = sharedPreferences?.getFloat("EUR", 1f)
-                        rate?.let { setTotalEUAmount(it) }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun updateUI(accountList: List<Account>) {
-        adapter =
-            accountListAdapterFactory.create(
-                accountList,
-                R.layout.account_list_item_colored
-            ) { navigateToAccountFragment(it) }
+        diagramView = view.findViewById(R.id.circleDiagram)
+        courseTextView = view.findViewById(R.id.usd_course_text_view)
+        eurCourseTextView = view.findViewById(R.id.eur_course_text_view)
+        adapter = accountListAdapterFactory.create(
+            R.layout.account_list_item_colored
+        ) { navigateToAccountFragment(it) }
+        homeAccountListRecyclerView = view.findViewById(R.id.home_account_list_rv)
         homeAccountListRecyclerView.adapter = adapter
-    }
-
-    private fun setTotalUSDAmount(rate: Float) {
-        courseTextView.text = getString(R.string.course, rate)
-
-        homeViewModel.setUsdAmount(rate)
-    }
-
-    private suspend fun setTotalEUAmount(rate: Float) {
-        eurCourseTextView.text = getString(R.string.course_eur, rate)
-
-        withContext(Dispatchers.IO) {
-            homeViewModel.setEurAmount(rate)
-        }
-
-        diagramView.setTotalAmount(homeViewModel.getUsdTotalAmount(), homeViewModel.getEurTotalAmount(), homeViewModel.getBynTotalAmount())
+        homeAccountListRecyclerView.layoutManager = LinearLayoutManager(context)
     }
 
     private fun navigateToAccountFragment(account: Account?) {

@@ -1,12 +1,12 @@
-package com.misterioesf.finance.dao
+package com.misterioesf.finance.data.dao
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.misterioesf.finance.dao.entity.Account
-import com.misterioesf.finance.dao.entity.Transfer
+import com.misterioesf.finance.data.dao.entity.Account
+import com.misterioesf.finance.data.dao.entity.Transfer
 
 @Database(entities = [Transfer::class, Account::class], version = 2)
 @TypeConverters(DaoTypeConverters::class)

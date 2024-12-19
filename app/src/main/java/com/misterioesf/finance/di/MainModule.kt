@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.misterioesf.finance.network.CurrencyService
 import com.misterioesf.finance.Utils
-import com.misterioesf.finance.dao.FinanceDao
-import com.misterioesf.finance.dao.FinanceDatabase
+import com.misterioesf.finance.data.dao.FinanceDao
+import com.misterioesf.finance.data.dao.FinanceDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -51,7 +51,7 @@
         android:label="TransferFragment"
         tools:layout="@layout/fragment_transfer">
         <argument android:name="transfer"
-            app:argType="com.misterioesf.finance.dao.entity.Transfer"
+            app:argType="com.misterioesf.finance.data.dao.entity.Transfer"
             android:defaultValue="@null"
             app:nullable="true"/>
         <argument
@@ -60,7 +60,7 @@
             android:defaultValue="-1" />
         <argument
             android:name="currency"
-            app:argType="com.misterioesf.finance.data.entity.Currencies"
+            app:argType="com.misterioesf.finance.domain.model.Currencies"
             android:defaultValue="USD" />
     </fragment>
     <fragment
@@ -76,7 +76,7 @@
         tools:layout="@layout/fragment_account_info" >
         <argument
             android:name="account"
-            app:argType="com.misterioesf.finance.dao.entity.Account"
+            app:argType="com.misterioesf.finance.data.dao.entity.Account"
             app:nullable="true"
             android:defaultValue="@null" />
     </fragment>

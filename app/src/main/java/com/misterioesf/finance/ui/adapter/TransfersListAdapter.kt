@@ -9,15 +9,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
-import com.misterioesf.finance.dao.entity.Transfer
+import com.misterioesf.finance.data.dao.entity.Transfer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
 class TransfersListAdapter @AssistedInject constructor(
-    @Assisted var transfersList: List<Transfer>,
     @Assisted val onTransferClick: (transfer: Transfer) -> Unit
 ) : RecyclerView.Adapter<TransfersListAdapter.TransferHolder>() {
 
+    private val transfersList = mutableListOf<Transfer>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransferHolder {
         val view =
@@ -32,6 +32,12 @@ class TransfersListAdapter @AssistedInject constructor(
     override fun onBindViewHolder(holder: TransferHolder, position: Int) {
         val transfer = transfersList[position]
         holder.bind(transfer)
+    }
+
+    fun updateData(list: List<Transfer>) {
+        transfersList.clear()
+        transfersList.addAll(list)
+        notifyDataSetChanged()
     }
 
     inner class TransferHolder(view: View, val onTransferClick: (transfer: Transfer) -> Unit) :

@@ -10,18 +10,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.misterioesf.finance.data.entity.Currencies
+import com.misterioesf.finance.domain.model.Currencies
 import com.misterioesf.finance.R
-import com.misterioesf.finance.dao.entity.Transfer
+import com.misterioesf.finance.data.dao.entity.Transfer
 import com.misterioesf.finance.ui.dialog.DatePickerDialogFragment
 import com.misterioesf.finance.viewModel.TransferViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "TRANSFER"
 
 @AndroidEntryPoint
 class TransferFragment : Fragment() {

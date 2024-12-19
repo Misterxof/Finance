@@ -12,17 +12,19 @@ import android.widget.ImageView
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.misterioesf.finance.R
-import com.misterioesf.finance.dao.entity.Transfer
-import com.misterioesf.finance.data.entity.Segment
+import com.misterioesf.finance.data.dao.entity.Transfer
 import com.misterioesf.finance.di.TransfersListAdapterFactory
+import com.misterioesf.finance.domain.model.Segment
 import com.misterioesf.finance.ui.adapter.TransfersListAdapter
 import com.misterioesf.finance.viewModel.AccountInfoViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 
@@ -46,12 +48,14 @@ class AccountInfoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_account_info, container, false)
-        transfersListAdapter = transfersListAdapterFactory.create(emptyList()) {}
         circleDiagramView = view.findViewById(R.id.circle_Diagram)
         transfersListRecyclerView = view.findViewById(R.id.info_account_list_rv)
         colorImageView = view.findViewById(R.id.account_info_color_image_view)
         accountInfoSpinner = view.findViewById(R.id.account_info_spinner)
         deleteAccountImageButton = view.findViewById(R.id.delete_account_img_button)
+
+        transfersListAdapter = transfersListAdapterFactory.create() {}
+        transfersListAdapter.updateData(emptyList())
 
         accountInfoSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -85,19 +89,21 @@ class AccountInfoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        accountInfoViewModel.getTransfersById(accountInfoViewModel.getAccountId()).observe(
-            viewLifecycleOwner
-        ) { transfers ->
-            transfers?.let {
-                accountInfoViewModel.transfersList = transfers
-                updateUI(transfers)
+
+        lifecycleScope.launch {
+            accountInfoViewModel.getTransfersById(accountInfoViewModel.getAccountId()).observe(
+                viewLifecycleOwner
+            ) { transfers ->
+                transfers?.let {
+                    accountInfoViewModel.transfersList = transfers
+                    updateUI(transfers)
+                }
             }
         }
     }
 
     private fun updateUI(transfers: List<Transfer>) {
-        transfersListAdapter = transfersListAdapterFactory.create(transfers) {}
-        transfersListRecyclerView.adapter = transfersListAdapter
+        transfersListAdapter.updateData(transfers)
 
         circleDiagramView.setMap(listToTree(transfers))
     }

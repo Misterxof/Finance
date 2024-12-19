@@ -1,4 +1,4 @@
-package com.misterioesf.finance.dao
+package com.misterioesf.finance.data.dao
 
 import androidx.room.TypeConverter
 import java.util.*

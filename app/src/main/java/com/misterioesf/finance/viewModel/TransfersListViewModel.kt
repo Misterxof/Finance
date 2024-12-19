@@ -1,57 +1,67 @@
 package com.misterioesf.finance.viewModel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import com.misterioesf.finance.data.entity.Currencies
-import com.misterioesf.finance.dao.entity.Account
-import com.misterioesf.finance.dao.entity.Transfer
-import com.misterioesf.finance.repository.FinanceRepository
+import androidx.lifecycle.viewModelScope
+import com.misterioesf.finance.data.dao.entity.Account
+import com.misterioesf.finance.domain.model.Currencies
+import com.misterioesf.finance.domain.model.StatefulData.SuccessState
+import com.misterioesf.finance.domain.usecase.TransferListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TransfersListViewModel @Inject constructor(
-    private val financeRepository: FinanceRepository
+    private val transferListUseCase: TransferListUseCase
 ) : ViewModel() {
     private var accountId: Int = -1
     private var currency = Currencies.BYN
 
-    val transfers = financeRepository.getAllTransfers()
+    val allAccounts = transferListUseCase.allAccounts
+    val transfersListUiState = transferListUseCase.transfersListUiState
 
-    fun getTransfersById(accountId: Int): LiveData<List<Transfer>> {
-       return financeRepository.getAllTransfersByAccount(accountId)
+    init {
+        getAllAccounts()
     }
 
-    suspend fun getAllAccounts(): List<Account> {
-        return withContext(Dispatchers.Default){
-            financeRepository.getAllAccountsList()
-        }
+    private fun getTransfersById(accountId: Int) {
+        this.accountId = accountId
+        transferListUseCase.getTransfersById(accountId)
     }
 
-    fun getAccountIndexById(id: Int, accountsList: List<Account>?) : Int {
-        accountsList?.forEachIndexed { i, acc ->
-            if (acc.id == id) return i
-        }
-        return 0
-    }
-
-    fun getAccountIdByName(name: String, accountsList: List<Account>?): Int? {
-        if (!accountsList.isNullOrEmpty()) {
-            accountsList!!.forEach {
-                if (it.name == name) {
-                    setCurrency(Currencies.valueOf(it.currency))
-                    return it.id
+    fun getAllAccounts() {
+        viewModelScope.launch(Dispatchers.IO) {
+            transferListUseCase.allAccounts.collect {
+                if (it is SuccessState) {
+                    currency = Currencies.valueOf(it.data!![0].currency)
+                    getTransfersById(it.data!![0].id)
                 }
             }
         }
+    }
 
-        return null
+    fun getNewAccountById(position: Int) {
+        val account = transferListUseCase.allAccounts.value.data!![position]
+        currency = Currencies.valueOf(account.currency)
+        getTransfersById(account.id)
+    }
+
+    fun getAccountIndexById(): Int {
+        if (transfersListUiState.value is SuccessState) {
+            transfersListUiState.value?.data?.forEachIndexed { i, acc ->
+                if (acc.id == accountId) return i
+            }
+        }
+
+        return 0
     }
 
     fun getAccountId() = accountId
-    fun setAccountId(value: Int) { accountId = value }
 
     fun getCurrency() = currency
-    fun setCurrency(value: Currencies)  { currency = value}
+    fun setCurrency(value: Currencies) {
+        currency = value
+    }
 }
